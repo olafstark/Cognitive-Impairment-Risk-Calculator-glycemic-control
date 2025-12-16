@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Impairment Risk Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e8e8e8;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #e8e8e8;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e8e8e8;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+        }
+        
+        .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #e94560 0%, #c33764 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+        }
+        
+        .result-container {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.1) 0%, rgba(195, 55, 100, 0.1) 100%);
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+        
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .risk-score {
+            font-size: 4em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e94560 0%, #f39c12 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .risk-label {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #e8e8e8;
+        }
+        
+        .risk-interpretation {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.95em;
+        }
+        
+        .risk-low { background: rgba(39, 174, 96, 0.2); border: 1px solid rgba(39, 174, 96, 0.4); }
+        .risk-moderate { background: rgba(243, 156, 18, 0.2); border: 1px solid rgba(243, 156, 18, 0.4); }
+        .risk-high { background: rgba(231, 76, 60, 0.2); border: 1px solid rgba(231, 76, 60, 0.4); }
+        
+        .disclaimer {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 0.85em;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+        
+        .info-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: rgba(233, 69, 96, 0.3);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: help;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Cognitive Impairment Risk Calculator</h1>
+        <p class="subtitle">Based on NHANES 2011-2014 Prediction Model<br>
+        <small>For adults aged 60+ years</small></p>
+        
+        <form id="riskForm">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Age <span class="info-icon" title="Age in years">?</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" id="age" min="60" max="100" value="70" required>
+                        <span class="unit">years</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Education Level</label>
+                    <select id="education">
+                        <option value="1">Less than 9th grade</option>
+                        <option value="2">9-11th grade</option>
+                        <option value="3" selected>High school/GED</option>
+                        <option value="4">Some college</option>
+                        <option value="5">College graduate or above</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>HbA1c <span class="info-icon" title="Glycated hemoglobin (%)">?</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" id="hba1c" min="4" max="15" step="0.1" value="6.0" required>
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>BMI <span class="info-icon" title="Body Mass Index">?</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" id="bmi" min="15" max="60" step="0.1" value="27" required>
+                        <span class="unit">kg/m²</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Daily Sugar Intake</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="sugar" min="0" max="500" value="80" required>
+                        <span class="unit">g/day</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Daily Fiber Intake</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="fiber" min="0" max="100" value="15" required>
+                        <span class="unit">g/day</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" class="calculate-btn" onclick="calculateRisk()">
+                Calculate Risk
+            </button>
+        </form>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="risk-score" id="riskScore">0%</div>
+            <div class="risk-label">Predicted Risk of Cognitive Impairment</div>
+            <div class="risk-interpretation" id="riskInterpretation"></div>
+        </div>
+        
+        <div class="disclaimer">
+            <strong>⚠️ Disclaimer:</strong> This calculator is for educational and research purposes only. 
+            It is not a substitute for professional medical advice, diagnosis, or treatment. 
+            The model was developed using NHANES 2011-2014 data and validated on NHANES 2001-2002.
+            Internal validation AUC: 0.811, External validation AUC: 0.828.
+            Always consult with a healthcare provider for clinical decisions.
+        </div>
+    </div>
+    
+    <script>
+        // Model coefficients (from logistic regression)
+        const coefficients = {
+            age_years: 0.485426,
+            education: -1.240170,
+            hba1c: 0.176373,
+            sugar_g: -0.067982,
+            fiber_g: -0.164602,
+            bmi: 0.006444
+        };
+        
+        const intercept = -2.189563;
+        
+        // Standardization parameters (mean and std from training)
+        const means = {
+            age_years: 69.3506,
+            education: 3.4111,
+            hba1c: 6.0858,
+            sugar_g: 95.2235,
+            fiber_g: 16.9389,
+            bmi: 29.1211
+        };
+        
+        const stds = {
+            age_years: 6.7822,
+            education: 1.2973,
+            hba1c: 1.0823,
+            sugar_g: 62.2859,
+            fiber_g: 10.4559,
+            bmi: 6.3333
+        };
+        
+        function calculateRisk() {
+            // Get input values
+            const age = parseFloat(document.getElementById('age').value);
+            const education = parseFloat(document.getElementById('education').value);
+            const hba1c = parseFloat(document.getElementById('hba1c').value);
+            const sugar = parseFloat(document.getElementById('sugar').value);
+            const fiber = parseFloat(document.getElementById('fiber').value);
+            const bmi = parseFloat(document.getElementById('bmi').value);
+            
+            // Standardize inputs
+            const age_std = (age - means.age_years) / stds.age_years;
+            const edu_std = (education - means.education) / stds.education;
+            const hba1c_std = (hba1c - means.hba1c) / stds.hba1c;
+            const sugar_std = (sugar - means.sugar_g) / stds.sugar_g;
+            const fiber_std = (fiber - means.fiber_g) / stds.fiber_g;
+            const bmi_std = (bmi - means.bmi) / stds.bmi;
+            
+            // Calculate log-odds
+            const logOdds = intercept + 
+                coefficients.age_years * age_std +
+                coefficients.education * edu_std +
+                coefficients.hba1c * hba1c_std +
+                coefficients.sugar_g * sugar_std +
+                coefficients.fiber_g * fiber_std +
+                coefficients.bmi * bmi_std;
+            
+            // Convert to probability
+            const probability = 1 / (1 + Math.exp(-logOdds));
+            const riskPercent = (probability * 100).toFixed(1);
+            
+            // Display result
+            document.getElementById('riskScore').textContent = riskPercent + '%';
+            
+            const resultContainer = document.getElementById('resultContainer');
+            const interpretation = document.getElementById('riskInterpretation');
+            
+            resultContainer.classList.add('show');
+            
+            if (probability < 0.10) {
+                interpretation.className = 'risk-interpretation risk-low';
+                interpretation.innerHTML = '<strong>Low Risk</strong><br>Predicted probability is below 10%. Regular health monitoring recommended.';
+            } else if (probability < 0.20) {
+                interpretation.className = 'risk-interpretation risk-moderate';
+                interpretation.innerHTML = '<strong>Moderate Risk</strong><br>Predicted probability is 10-20%. Consider cognitive screening and lifestyle modifications.';
+            } else {
+                interpretation.className = 'risk-interpretation risk-high';
+                interpretation.innerHTML = '<strong>Elevated Risk</strong><br>Predicted probability is ≥20%. Comprehensive cognitive assessment recommended.';
+            }
+        }
+        
+        // Calculate on page load with default values
+        window.onload = calculateRisk;
+    </script>
+</body>
+</html>
